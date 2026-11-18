@@ -79,7 +79,7 @@ const regions: Region[] = [
 ]
 
 const menuLinks: MenuLink[] = [
-    { label: "Mapa", target: "#mapa", hotspot: { centerX: 1116.88, centerY: 40.368, width: 133.488, height: 56.608 } },
+    { label: "Mapa", target: "#mapa", hotspot: { centerX: 1116.52, centerY: 40.368, width: 133.488, height: 56.608 } },
     { label: "Projetos", target: "#projetos", hotspot: { centerX: 1257.424, centerY: 40.368, width: 148.32, height: 56.608 } },
     { label: "Sobre", target: "#inicio", hotspot: { centerX: 1400.0, centerY: 40.368, width: 136.784, height: 56.608 } },
     { label: "Contato", target: "#contato", hotspot: { centerX: 1526.048, centerY: 40.368, width: 115.36, height: 56.608 } },
