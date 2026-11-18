@@ -195,6 +195,8 @@ export default function CityMap() {
                             <span className="city-map__glow city-map__glow--north" />
                             <span className="city-map__glow city-map__glow--west" />
                             <span className="city-map__glow city-map__glow--east" />
+                            <span className="city-map__lightflow city-map__lightflow--violet" />
+                            <span className="city-map__lightflow city-map__lightflow--cyan" />
                         </div>
                     )}
 
