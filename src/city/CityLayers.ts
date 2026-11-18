@@ -1,4 +1,4 @@
-import { CITY_COLORS, CITY_DISTRICTS, CITY_SCENE, type CityDistrict } from "./city-config"
+import { CITY_COLORS, CITY_DISTRICTS, CITY_SCENE, CITY_SEED, type CityDistrict } from "./city-config"
 
 type Point = { x: number; y: number }
 type BuildingSpec = {
@@ -14,7 +14,6 @@ type BuildingSpec = {
 
 type Random = () => number
 
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
 const int = (value: number) => Math.round(value)
 
 function seededRandom(seed: number): Random {
@@ -100,6 +99,35 @@ function drawSky(ctx: CanvasRenderingContext2D, random: Random) {
                 ctx.fillRect(x, y, 3, 2)
             }
         }
+    }
+}
+
+function drawTopNavigation(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = "rgba(9,7,20,0.82)"
+    ctx.fillRect(12, 7, 138, 25)
+    ctx.fillStyle = "#DCC9F4"
+    ctx.font = "bold 7px monospace"
+    ctx.textAlign = "left"
+    ctx.textBaseline = "middle"
+    ctx.fillText("GV / CITY NETWORK", 19, 20)
+
+    const items = [
+        { label: "MAPA", x: 524, width: 68 },
+        { label: "PROJETOS", x: 592, width: 74 },
+        { label: "SOBRE", x: 666, width: 68 },
+        { label: "CONTATO", x: 734, width: 58 },
+    ]
+
+    for (const item of items) {
+        ctx.fillStyle = "rgba(12,9,25,0.78)"
+        ctx.fillRect(item.x, 7, item.width, 27)
+        ctx.fillStyle = "rgba(190,143,237,0.48)"
+        ctx.fillRect(item.x, 7, item.width, 1)
+        ctx.fillRect(item.x, 33, item.width, 1)
+        ctx.fillStyle = "#E9DFFF"
+        ctx.font = "bold 6px monospace"
+        ctx.textAlign = "center"
+        ctx.fillText(item.label, item.x + item.width / 2, 21)
     }
 }
 
@@ -430,12 +458,13 @@ function drawVignette(ctx: CanvasRenderingContext2D) {
 }
 
 export function renderCityScene(ctx: CanvasRenderingContext2D) {
-    const random = seededRandom(20261118)
+    const random = seededRandom(CITY_SEED)
     ctx.save()
     ctx.imageSmoothingEnabled = false
     ctx.clearRect(0, 0, CITY_SCENE.width, CITY_SCENE.height)
 
     drawSky(ctx, random)
+    drawTopNavigation(ctx)
     drawFarSkyline(ctx, random)
     drawGround(ctx)
     drawWaterway(ctx)
