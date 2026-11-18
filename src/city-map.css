@@ -59,26 +59,26 @@ html {
 
 .city-map__rain {
     position: absolute;
-    inset: -18%;
-    opacity: 0.15;
+    inset: -22%;
+    opacity: 0.32;
     background-image:
-        repeating-linear-gradient(111deg, transparent 0 29px, rgba(206, 202, 255, 0.42) 30px, transparent 31px 138px),
-        repeating-linear-gradient(111deg, transparent 0 73px, rgba(136, 183, 255, 0.32) 74px, transparent 75px 220px);
-    background-size: 138px 188px, 220px 260px;
-    mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 84%, transparent 100%);
-    animation: city-map-rain-drift 1.9s linear infinite;
+        repeating-linear-gradient(111deg, transparent 0 18px, rgba(225, 224, 255, 0.58) 19px, transparent 20px 96px),
+        repeating-linear-gradient(111deg, transparent 0 44px, rgba(130, 190, 255, 0.48) 45px, transparent 46px 164px);
+    background-size: 96px 148px, 164px 218px;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+    animation: city-map-rain-drift 1.55s linear infinite;
 }
 
 .city-map__haze {
     position: absolute;
     display: block;
-    width: 48%;
-    height: 34%;
+    width: 54%;
+    height: 42%;
     border-radius: 50%;
-    filter: blur(42px);
-    opacity: 0.22;
+    filter: blur(34px);
+    opacity: 0.42;
     mix-blend-mode: screen;
-    background: radial-gradient(ellipse, rgba(155, 93, 255, 0.38) 0%, rgba(83, 71, 177, 0.16) 42%, transparent 72%);
+    background: radial-gradient(ellipse, rgba(177, 113, 255, 0.58) 0%, rgba(89, 103, 211, 0.25) 42%, transparent 74%);
     animation: city-map-haze-drift 21s ease-in-out infinite alternate;
 }
 
@@ -110,13 +110,13 @@ html {
 .city-map__glow {
     position: absolute;
     display: block;
-    width: clamp(8rem, 20vw, 22rem);
+    width: clamp(9rem, 22vw, 24rem);
     aspect-ratio: 1;
     border-radius: 50%;
-    opacity: 0.2;
-    filter: blur(24px);
+    opacity: 0.34;
+    filter: blur(22px);
     mix-blend-mode: screen;
-    background: radial-gradient(circle, rgba(213, 157, 255, 0.4) 0%, rgba(145, 71, 255, 0.16) 38%, transparent 72%);
+    background: radial-gradient(circle, rgba(230, 186, 255, 0.56) 0%, rgba(157, 91, 255, 0.25) 38%, transparent 72%);
     animation: city-map-light-pulse 8s ease-in-out infinite;
 }
 
@@ -165,12 +165,70 @@ html {
 
 @keyframes city-map-light-pulse {
     0%, 100% {
-        opacity: 0.12;
+        opacity: 0.2;
         transform: scale(0.94);
     }
     50% {
-        opacity: 0.28;
-        transform: scale(1.06);
+        opacity: 0.48;
+        transform: scale(1.08);
+    }
+}
+
+.city-map__lightflow {
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    display: block;
+    width: 24%;
+    opacity: 0.72;
+    filter: blur(7px);
+    mix-blend-mode: screen;
+    transform: skewX(-18deg);
+    pointer-events: none;
+}
+
+.city-map__lightflow--violet {
+    left: -38%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(159, 91, 255, 0.02) 22%,
+        rgba(180, 118, 255, 0.28) 48%,
+        rgba(219, 182, 255, 0.12) 58%,
+        transparent 100%
+    );
+    animation: city-map-light-sweep 17s ease-in-out infinite;
+}
+
+.city-map__lightflow--cyan {
+    left: -48%;
+    width: 15%;
+    opacity: 0.58;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(84, 169, 255, 0.02) 24%,
+        rgba(105, 190, 255, 0.24) 50%,
+        rgba(181, 216, 255, 0.1) 62%,
+        transparent 100%
+    );
+    animation: city-map-light-sweep 23s 5s ease-in-out infinite;
+}
+
+@keyframes city-map-light-sweep {
+    0%, 12% {
+        left: -38%;
+        opacity: 0;
+    }
+    28% {
+        opacity: 0.78;
+    }
+    72% {
+        opacity: 0.62;
+    }
+    92%, 100% {
+        left: 112%;
+        opacity: 0;
     }
 }
 
@@ -498,6 +556,14 @@ html {
 }
 
 @media (max-width: 760px) {
+    .city-map__ambience {
+        opacity: 0.86;
+    }
+
+    .city-map__rain {
+        opacity: 0.24;
+    }
+
     .city-map {
         padding: 0.75rem;
     }
