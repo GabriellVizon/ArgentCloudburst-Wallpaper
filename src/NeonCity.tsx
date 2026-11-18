@@ -16,6 +16,7 @@ export default function NeonCity() {
                             scale={100}
                             depth={55}
                             sunSize={18}
+                            hover={92}
                             lamps
                             advanced={{
                                 baseSpeed: 24,
