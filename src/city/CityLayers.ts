@@ -169,18 +169,35 @@ function drawGround(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = CITY_COLORS.ground
     ctx.fillRect(0, 218, CITY_SCENE.width, CITY_SCENE.height - 218)
 
-    // Broad, low-contrast city blocks and an isometric planning grid.
-    for (let y = 238; y < CITY_SCENE.height; y += 28) {
-        const depth = (y - 238) / (CITY_SCENE.height - 238)
-        const alpha = 0.08 + depth * 0.11
-        line(ctx, [{ x: 0, y }, { x: CITY_SCENE.width, y: y - 8 }], `rgba(125,96,166,${alpha.toFixed(3)})`, 1)
-    }
-    for (let x = -180; x < CITY_SCENE.width + 180; x += 54) {
-        line(ctx, [{ x, y: 220 }, { x: x + 170, y: CITY_SCENE.height }], "rgba(125,96,166,0.12)", 1)
-        line(ctx, [{ x, y: 220 }, { x: x - 170, y: CITY_SCENE.height }], "rgba(125,96,166,0.09)", 1)
+    // A quiet pool of city light anchors the center of the ground plane.
+    glow(ctx, 412, 322, 245, "rgba(106,64,158,0.42)", 0.12)
+
+    // Perspective grid converges toward the city's central horizon.
+    const horizon = { x: 412, y: 224 }
+    for (let index = 0; index <= 12; index++) {
+        const bottomX = -240 + index * 108
+        line(
+            ctx,
+            [horizon, { x: bottomX, y: CITY_SCENE.height + 4 }],
+            "rgba(132,105,171,0.105)",
+            1,
+        )
     }
 
-    // Low silhouettes establish blocks between the five districts.
+    // Cross streets compress toward the horizon and open toward the viewer.
+    for (let index = 1; index <= 9; index++) {
+        const progress = index / 9
+        const y = horizon.y + Math.pow(progress, 1.68) * (CITY_SCENE.height - horizon.y)
+        const alpha = 0.045 + progress * 0.095
+        line(
+            ctx,
+            [{ x: 0, y }, { x: CITY_SCENE.width, y: y - 3 }],
+            `rgba(145,111,185,${alpha.toFixed(3)})`,
+            1,
+        )
+    }
+
+    // Low city blocks settle into the horizon behind the main districts.
     for (let index = 0; index < 22; index++) {
         const x = index * 39 - 8
         const height = 14 + ((index * 17) % 30)
@@ -189,6 +206,16 @@ function drawGround(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = "rgba(181,132,225,0.13)"
         ctx.fillRect(x + 2, 250 - height, 1, height - 2)
     }
+
+    // Foreground paving receives a little more contrast than the distant ground.
+    ctx.fillStyle = "rgba(133,98,176,0.07)"
+    polygon(ctx, [
+        { x: 0, y: 365 },
+        { x: 412, y: 340 },
+        { x: CITY_SCENE.width, y: 365 },
+        { x: CITY_SCENE.width, y: CITY_SCENE.height },
+        { x: 0, y: CITY_SCENE.height },
+    ])
 }
 
 function drawBuilding(ctx: CanvasRenderingContext2D, spec: BuildingSpec, seed: number) {
@@ -199,32 +226,60 @@ function drawBuilding(ctx: CanvasRenderingContext2D, spec: BuildingSpec, seed: n
     const frontColor = spec.hue === "blue" ? "#1B2941" : spec.hue === "pink" ? "#382044" : CITY_COLORS.buildingFront
     const roofColor = spec.hue === "blue" ? "#2A4564" : spec.hue === "pink" ? "#56305F" : CITY_COLORS.buildingRoof
 
+    // Contact shadow gives the structure a visible footprint on the city floor.
+    polygon(ctx, [
+        { x: x + depth * 0.35, y: baseY - 1 },
+        { x: x + width + depth + 3, y: baseY - 1 },
+        { x: x + width + depth + 12, y: baseY + 5 },
+        { x: x + depth + 8, y: baseY + 5 },
+    ], "rgba(3,2,10,0.34)")
+
+    // Right facade: darker plane with subtle floor divisions.
     polygon(ctx, [
         { x: x + width, y: topY },
         { x: x + width + depth, y: topY - depth * 0.35 },
         { x: x + width + depth, y: baseY - depth * 0.35 },
         { x: x + width, y: baseY },
-    ], sideColor)
+    ], sideColor, "rgba(9,6,19,0.34)")
 
+    const sideFloorStep = Math.max(9, int(height / 8))
+    for (let y = topY + sideFloorStep; y < baseY - depth * 0.35; y += sideFloorStep) {
+        line(
+            ctx,
+            [
+                { x: x + width + 1, y },
+                { x: x + width + depth - 1, y: y - depth * 0.35 },
+            ],
+            "rgba(190,154,224,0.11)",
+            1,
+        )
+    }
+
+    // Front facade and its structural edges.
     ctx.fillStyle = frontColor
     ctx.fillRect(int(x), int(topY), int(width), int(height))
-
-    polygon(ctx, [
-        { x, y: topY },
-        { x: x + depth, y: topY - depth * 0.35 },
-        { x: x + width + depth, y: topY - depth * 0.35 },
-        { x: x + width, y: topY },
-    ], roofColor)
-
-    ctx.fillStyle = "rgba(201,160,239,0.32)"
+    ctx.fillStyle = "rgba(207,175,241,0.24)"
     ctx.fillRect(int(x), int(topY), 1, int(height))
-    ctx.fillStyle = "rgba(7,5,16,0.42)"
+    ctx.fillStyle = "rgba(7,5,16,0.46)"
     ctx.fillRect(int(x + width - 2), int(topY + 1), 2, int(height - 1))
 
     const rows = Math.max(2, int(height / 10))
     const columns = Math.max(1, int(width / 8))
     const litChance = spec.windows ?? 0.62
 
+    // Thin floor bands and vertical mullions make the facade read as architecture.
+    for (let row = 1; row < rows; row++) {
+        const floorY = int(topY + 5 + row * ((height - 8) / rows))
+        ctx.fillStyle = "rgba(207,175,241,0.055)"
+        ctx.fillRect(int(x + 2), floorY, Math.max(1, int(width - 4)), 1)
+    }
+    for (let column = 1; column < columns; column++) {
+        const mullionX = int(x + 3 + column * ((width - 6) / columns))
+        ctx.fillStyle = "rgba(6,4,14,0.22)"
+        ctx.fillRect(mullionX, int(topY + 3), 1, int(height - 6))
+    }
+
+    // Windows use a stable seed so the city never changes between renders.
     for (let row = 0; row < rows; row++) {
         for (let column = 0; column < columns; column++) {
             if (random() > litChance) continue
@@ -240,6 +295,18 @@ function drawBuilding(ctx: CanvasRenderingContext2D, spec: BuildingSpec, seed: n
             }
         }
     }
+
+    // A narrow lit rim separates the roof from the night sky.
+    line(
+        ctx,
+        [
+            { x, y: topY },
+            { x: x + depth, y: topY - depth * 0.35 },
+            { x: x + width + depth, y: topY - depth * 0.35 },
+        ],
+        "rgba(218,184,255,0.34)",
+        1,
+    )
 
     if (spec.rooftop === "antenna") {
         const center = int(x + width * 0.52)
@@ -261,8 +328,13 @@ function drawBuilding(ctx: CanvasRenderingContext2D, spec: BuildingSpec, seed: n
         ctx.fillStyle = spec.hue === "blue" ? "#8BE4FF" : "#F0B6FF"
         ctx.fillRect(int(x + 5), int(topY + 9), Math.max(3, int(width - 10)), 1)
     }
-}
 
+    // Base trim grounds the building and reinforces its vertical silhouette.
+    ctx.fillStyle = "rgba(5,3,13,0.45)"
+    ctx.fillRect(int(x), int(baseY - 2), int(width), 2)
+    ctx.fillStyle = "rgba(201,160,239,0.18)"
+    ctx.fillRect(int(x), int(baseY - 1), int(width), 1)
+}
 function drawDistrictBuildings(ctx: CanvasRenderingContext2D, plane: "all" | "middle" | "near" = "all") {
     const buildings: BuildingSpec[] = [
         // Technology district — server towers and cool cyan lighting.
@@ -319,6 +391,26 @@ function drawDistrictBuildings(ctx: CanvasRenderingContext2D, plane: "all" | "mi
     }
 }
 
+
+function drawDistantDistrictBlocks(ctx: CanvasRenderingContext2D) {
+    const blocks: BuildingSpec[] = [
+        { x: 18, baseY: 302, width: 27, height: 58, depth: 8, hue: "neutral", rooftop: "none", windows: 0.34 },
+        { x: 54, baseY: 298, width: 22, height: 44, depth: 7, hue: "blue", rooftop: "antenna", windows: 0.28 },
+        { x: 286, baseY: 307, width: 26, height: 54, depth: 8, hue: "violet", rooftop: "none", windows: 0.3 },
+        { x: 318, baseY: 304, width: 19, height: 40, depth: 6, hue: "neutral", rooftop: "sign", windows: 0.24 },
+        { x: 533, baseY: 305, width: 24, height: 46, depth: 7, hue: "blue", rooftop: "none", windows: 0.28 },
+        { x: 565, baseY: 311, width: 29, height: 61, depth: 9, hue: "violet", rooftop: "antenna", windows: 0.32 },
+        { x: 784, baseY: 302, width: 25, height: 52, depth: 8, hue: "neutral", rooftop: "none", windows: 0.26 },
+    ]
+
+    for (let index = 0; index < blocks.length; index++) {
+        ctx.save()
+        ctx.globalAlpha = 0.54
+        drawBuilding(ctx, blocks[index], 4300 + index * 23)
+        ctx.restore()
+    }
+}
+
 function drawElevatedRoads(ctx: CanvasRenderingContext2D) {
     const mainRoads: Point[][] = [
         [{ x: -20, y: 244 }, { x: 82, y: 236 }, { x: 173, y: 255 }, { x: 267, y: 250 }, { x: 355, y: 272 }, { x: 462, y: 258 }, { x: 560, y: 276 }, { x: 674, y: 258 }, { x: 844, y: 270 }],
@@ -326,10 +418,20 @@ function drawElevatedRoads(ctx: CanvasRenderingContext2D) {
         [{ x: 518, y: 286 }, { x: 582, y: 303 }, { x: 645, y: 307 }, { x: 716, y: 298 }, { x: 840, y: 326 }],
     ]
 
+    // Road decks become subtly broader toward the viewer.
     for (const points of mainRoads) {
-        line(ctx, points, "rgba(128,72,180,0.42)", 15)
-        line(ctx, points, "#191827", 10)
-        line(ctx, points, "rgba(183,124,231,0.46)", 1)
+        for (let index = 0; index < points.length - 1; index++) {
+            const start = points[index]
+            const end = points[index + 1]
+            const averageY = (start.y + end.y) / 2
+            const depth = Math.max(0, Math.min(1, (averageY - 220) / 244))
+            const deckWidth = 8 + depth * 4
+
+            line(ctx, [start, end], "rgba(4,3,12,0.58)", deckWidth + 7)
+            line(ctx, [start, end], "rgba(128,72,180,0.34)", deckWidth + 3)
+            line(ctx, [start, end], "#191827", deckWidth)
+            line(ctx, [start, end], "rgba(183,124,231,0.42)", 1)
+        }
     }
 
     const avenue = mainRoads[0]
@@ -347,7 +449,17 @@ function drawElevatedRoads(ctx: CanvasRenderingContext2D) {
         }
     }
 
+    // Bridge supports enter the water plane before the deck.
+    for (const supportX of [414, 447, 480]) {
+        ctx.fillStyle = "rgba(7,5,18,0.78)"
+        ctx.fillRect(supportX - 2, 373, 4, 14)
+        ctx.fillStyle = "rgba(139,101,179,0.42)"
+        ctx.fillRect(supportX - 1, 374, 1, 11)
+    }
+
     // Bridge deck crossing the southern waterway.
+    ctx.fillStyle = "rgba(3,2,10,0.55)"
+    ctx.fillRect(391, 374, 112, 5)
     ctx.fillStyle = "#27223D"
     ctx.fillRect(395, 367, 104, 8)
     ctx.fillStyle = "#8B65B3"
@@ -480,6 +592,7 @@ export type CityLayerId =
     | "sky"
     | "skyline"
     | "terrain"
+    | "district-backdrop"
     | "transit"
     | "architecture"
     | "foreground"
@@ -490,6 +603,7 @@ export const CITY_RENDER_LAYERS: readonly { id: CityLayerId }[] = [
     { id: "sky" },
     { id: "skyline" },
     { id: "terrain" },
+    { id: "district-backdrop" },
     { id: "transit" },
     { id: "architecture" },
     { id: "foreground" },
@@ -509,6 +623,9 @@ export function renderCityLayer(ctx: CanvasRenderingContext2D, layer: CityLayerI
             break
         case "terrain":
             drawGround(ctx)
+            break
+        case "district-backdrop":
+            drawDistantDistrictBlocks(ctx)
             break
         case "transit":
             drawWaterway(ctx)
