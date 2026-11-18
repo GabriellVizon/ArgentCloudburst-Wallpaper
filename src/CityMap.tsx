@@ -159,6 +159,17 @@ export default function CityMap() {
                             </div>
                         </>
                     )}
+
+                    {!artLoaded && (
+                        <nav className="city-map__fallback-regions" aria-label="Selecionar região do mapa">
+                            {regions.map((region) => (
+                                <a href={region.target} key={region.id}>
+                                    <strong>{region.number}. {region.title}</strong>
+                                    <span>{region.subtitle}</span>
+                                </a>
+                            ))}
+                        </nav>
+                    )}
                 </div>
 
                 <nav className="city-map__mobile-nav" aria-label="Explorar as regiões da cidade">
