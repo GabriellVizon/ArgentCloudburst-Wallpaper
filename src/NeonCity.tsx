@@ -1,10 +1,11 @@
 import ArgentCloudburst from "./ArgentCloudburst"
 import PixelParallaxSkyline from "./PixelParallaxSkyline"
+import CityMap from "./CityMap"
 
 export default function NeonCity() {
     return (
         <main className="neon-city">
-            <section className="neon-hero" aria-labelledby="neon-hero-title">
+            <section id="inicio" className="neon-hero" aria-labelledby="neon-hero-title">
                 <div className="neon-scene" aria-hidden="true">
                     <div className="neon-scene__skyline">
                         <PixelParallaxSkyline
@@ -86,6 +87,8 @@ export default function NeonCity() {
                     </p>
                 </div>
             </section>
+
+            <CityMap />
         </main>
     )
 }
