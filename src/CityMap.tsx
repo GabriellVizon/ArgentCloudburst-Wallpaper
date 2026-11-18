@@ -1,14 +1,40 @@
 import { useState } from "react"
 
+const MAP_VIEWBOX = {
+    width: 1648,
+    height: 928,
+}
+
+type Hotspot = {
+    centerX: number
+    centerY: number
+    width: number
+    height: number
+}
+
 type Region = {
     id: string
     number: string
     title: string
     subtitle: string
     target: string
-    position: { left: string; top: string; width: string; height: string }
+    hotspot: Hotspot
 }
 
+type MenuLink = {
+    label: string
+    target: string
+    hotspot: Hotspot
+}
+
+/**
+ * Coordinates are stored in the artwork's native 1648 × 928 coordinate
+ * space. The SVG overlay therefore scales with the PNG without recalculating
+ * percentages against a potentially different container.
+ *
+ * Values below are the first calibrated pass, translated from the previous
+ * hotspot rectangles. Open the page with ?mapDebug=1 to inspect their bounds.
+ */
 const regions: Region[] = [
     {
         id: "centro",
@@ -16,7 +42,7 @@ const regions: Region[] = [
         title: "Centro",
         subtitle: "Minha identidade",
         target: "#inicio",
-        position: { left: "44.4%", top: "22.1%", width: "12.8%", height: "8.1%" },
+        hotspot: { centerX: 837.184, centerY: 242.672, width: 210.944, height: 75.168 },
     },
     {
         id: "tecnologia",
@@ -24,7 +50,7 @@ const regions: Region[] = [
         title: "Distrito Tecnológico",
         subtitle: "Habilidades e ferramentas",
         target: "#tecnologia",
-        position: { left: "15.6%", top: "30.8%", width: "17.5%", height: "8.7%" },
+        hotspot: { centerX: 401.288, centerY: 326.192, width: 288.4, height: 80.736 },
     },
     {
         id: "carreira",
@@ -32,7 +58,7 @@ const regions: Region[] = [
         title: "Distrito Profissional",
         subtitle: "Experiências e carreira",
         target: "#carreira",
-        position: { left: "74.5%", top: "31.2%", width: "18.5%", height: "8.7%" },
+        hotspot: { centerX: 1380.2, centerY: 329.904, width: 304.88, height: 80.736 },
     },
     {
         id: "projetos",
@@ -40,7 +66,7 @@ const regions: Region[] = [
         title: "Zona de Projetos",
         subtitle: "Meus projetos e criações",
         target: "#projetos",
-        position: { left: "25.4%", top: "62.1%", width: "17.2%", height: "8.4%" },
+        hotspot: { centerX: 560.32, centerY: 615.264, width: 283.456, height: 78.0 },
     },
     {
         id: "contato",
@@ -48,15 +74,15 @@ const regions: Region[] = [
         title: "Ponto de Conexão",
         subtitle: "Contato e redes",
         target: "#contato",
-        position: { left: "69.8%", top: "65.1%", width: "17.8%", height: "8.4%" },
+        hotspot: { centerX: 1296.976, centerY: 643.104, width: 293.344, height: 78.0 },
     },
 ]
 
-const menuLinks = [
-    { label: "Mapa", target: "#mapa", position: { left: "63.7%", width: "8.1%" } },
-    { label: "Projetos", target: "#projetos", position: { left: "71.8%", width: "9.0%" } },
-    { label: "Sobre", target: "#inicio", position: { left: "80.8%", width: "8.3%" } },
-    { label: "Contato", target: "#contato", position: { left: "89.1%", width: "7.0%" } },
+const menuLinks: MenuLink[] = [
+    { label: "Mapa", target: "#mapa", hotspot: { centerX: 1116.88, centerY: 40.368, width: 133.488, height: 56.608 } },
+    { label: "Projetos", target: "#projetos", hotspot: { centerX: 1257.424, centerY: 40.368, width: 148.32, height: 56.608 } },
+    { label: "Sobre", target: "#inicio", hotspot: { centerX: 1400.0, centerY: 40.368, width: 136.784, height: 56.608 } },
+    { label: "Contato", target: "#contato", hotspot: { centerX: 1526.048, centerY: 40.368, width: 115.36, height: 56.608 } },
 ]
 
 const chapters = [
@@ -98,13 +124,25 @@ const chapters = [
     },
 ]
 
+function hotspotRect(hotspot: Hotspot) {
+    return {
+        x: hotspot.centerX - hotspot.width / 2,
+        y: hotspot.centerY - hotspot.height / 2,
+        width: hotspot.width,
+        height: hotspot.height,
+    }
+}
+
 export default function CityMap() {
     const [artLoaded, setArtLoaded] = useState(true)
+    const [showHotspotGuides] = useState(
+        () => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("mapDebug"),
+    )
 
     return (
         <>
             <section id="mapa" className="city-map" aria-label="Mapa interativo da cidade">
-                <div className="city-map__frame">
+                <div className={`city-map__frame${showHotspotGuides ? " city-map__frame--debug" : ""}`}>
                     {artLoaded ? (
                         <img
                             className="city-map__art"
@@ -126,37 +164,81 @@ export default function CityMap() {
 
                     {artLoaded && (
                         <>
-                            <nav className="city-map__image-nav" aria-label="Navegação principal">
-                                {menuLinks.map((link) => (
-                                    <a
-                                        key={link.label}
-                                        href={link.target}
-                                        aria-label={link.label}
-                                        title={link.label}
-                                        style={{
-                                            left: link.position.left,
-                                            width: link.position.width,
-                                        }}
-                                    />
-                                ))}
-                            </nav>
+                            <svg
+                                className="city-map__image-nav"
+                                viewBox={`0 0 ${MAP_VIEWBOX.width} ${MAP_VIEWBOX.height}`}
+                                preserveAspectRatio="none"
+                                role="navigation"
+                                aria-label="Navegação principal"
+                            >
+                                {menuLinks.map((link) => {
+                                    const rect = hotspotRect(link.hotspot)
+                                    return (
+                                        <a
+                                            key={link.label}
+                                            href={link.target}
+                                            aria-label={link.label}
+                                            title={link.label}
+                                        >
+                                            <rect
+                                                className="city-map__hotspot"
+                                                x={rect.x}
+                                                y={rect.y}
+                                                width={rect.width}
+                                                height={rect.height}
+                                                rx="10"
+                                            />
+                                            {showHotspotGuides && (
+                                                <text
+                                                    className="city-map__debug-label"
+                                                    x={link.hotspot.centerX}
+                                                    y={link.hotspot.centerY}
+                                                >
+                                                    {link.label}
+                                                </text>
+                                            )}
+                                        </a>
+                                    )
+                                })}
+                            </svg>
 
-                            <div className="city-map__image-regions" aria-label="Selecionar região">
-                                {regions.map((region) => (
-                                    <a
-                                        key={region.id}
-                                        href={region.target}
-                                        aria-label={`${region.number}. ${region.title}: ${region.subtitle}`}
-                                        title={region.title}
-                                        style={{
-                                            left: region.position.left,
-                                            top: region.position.top,
-                                            width: region.position.width,
-                                            height: region.position.height,
-                                        }}
-                                    />
-                                ))}
-                            </div>
+                            <svg
+                                className="city-map__image-regions"
+                                viewBox={`0 0 ${MAP_VIEWBOX.width} ${MAP_VIEWBOX.height}`}
+                                preserveAspectRatio="none"
+                                role="group"
+                                aria-label="Selecionar região"
+                            >
+                                {regions.map((region) => {
+                                    const rect = hotspotRect(region.hotspot)
+                                    return (
+                                        <a
+                                            key={region.id}
+                                            href={region.target}
+                                            aria-label={`${region.number}. ${region.title}: ${region.subtitle}`}
+                                            title={region.title}
+                                        >
+                                            <rect
+                                                className="city-map__hotspot"
+                                                x={rect.x}
+                                                y={rect.y}
+                                                width={rect.width}
+                                                height={rect.height}
+                                                rx="12"
+                                            />
+                                            {showHotspotGuides && (
+                                                <text
+                                                    className="city-map__debug-label"
+                                                    x={region.hotspot.centerX}
+                                                    y={region.hotspot.centerY}
+                                                >
+                                                    {region.number}
+                                                </text>
+                                            )}
+                                        </a>
+                                    )
+                                })}
+                            </svg>
                         </>
                     )}
 
