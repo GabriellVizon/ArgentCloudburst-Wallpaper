@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type PointerEvent } from "react"
 
 const MAP_VIEWBOX = {
     width: 1648,
@@ -139,10 +139,34 @@ export default function CityMap() {
         () => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("mapDebug"),
     )
 
+    const handleMapPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+        if (event.pointerType === "touch" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            return
+        }
+
+        const bounds = event.currentTarget.getBoundingClientRect()
+        if (!bounds.width || !bounds.height) return
+
+        const offsetX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2
+        const offsetY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2
+
+        event.currentTarget.style.setProperty("--map-shift-x", `${(offsetX * 5).toFixed(2)}px`)
+        event.currentTarget.style.setProperty("--map-shift-y", `${(offsetY * 4).toFixed(2)}px`)
+    }
+
+    const handleMapPointerLeave = (event: PointerEvent<HTMLDivElement>) => {
+        event.currentTarget.style.setProperty("--map-shift-x", "0px")
+        event.currentTarget.style.setProperty("--map-shift-y", "0px")
+    }
+
     return (
         <>
             <section id="mapa" className="city-map" aria-label="Mapa interativo da cidade">
-                <div className={`city-map__frame${showHotspotGuides ? " city-map__frame--debug" : ""}`}>
+                <div
+                    className={`city-map__frame${showHotspotGuides ? " city-map__frame--debug" : ""}`}
+                    onPointerMove={handleMapPointerMove}
+                    onPointerLeave={handleMapPointerLeave}
+                >
                     {artLoaded ? (
                         <img
                             className="city-map__art"
@@ -159,6 +183,18 @@ export default function CityMap() {
                                 <strong>MAPA DA METRÓPOLE</strong>
                                 <small>O cenário será carregado de public/assets/neon-cyberpunk-city-map.png</small>
                             </div>
+                        </div>
+                    )}
+
+                    {artLoaded && (
+                        <div className="city-map__ambience" aria-hidden="true">
+                            <span className="city-map__rain" />
+                            <span className="city-map__haze city-map__haze--left" />
+                            <span className="city-map__haze city-map__haze--center" />
+                            <span className="city-map__haze city-map__haze--right" />
+                            <span className="city-map__glow city-map__glow--north" />
+                            <span className="city-map__glow city-map__glow--west" />
+                            <span className="city-map__glow city-map__glow--east" />
                         </div>
                     )}
 
