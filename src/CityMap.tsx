@@ -1,4 +1,5 @@
-import { useState, type PointerEvent } from "react"
+import { useState } from "react"
+import CityEnvironment from "./city/CityEnvironment"
 
 const MAP_VIEWBOX = {
     width: 1648,
@@ -134,46 +135,17 @@ function hotspotRect(hotspot: Hotspot) {
 }
 
 export default function CityMap() {
-    const [artLoaded, setArtLoaded] = useState(true)
+    const [sceneAvailable, setSceneAvailable] = useState(true)
     const [showHotspotGuides] = useState(
         () => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("mapDebug"),
     )
 
-    const handleMapPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-        if (event.pointerType === "touch" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            return
-        }
-
-        const bounds = event.currentTarget.getBoundingClientRect()
-        if (!bounds.width || !bounds.height) return
-
-        const offsetX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2
-        const offsetY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2
-
-        event.currentTarget.style.setProperty("--map-shift-x", `${(offsetX * 5).toFixed(2)}px`)
-        event.currentTarget.style.setProperty("--map-shift-y", `${(offsetY * 4).toFixed(2)}px`)
-    }
-
-    const handleMapPointerLeave = (event: PointerEvent<HTMLDivElement>) => {
-        event.currentTarget.style.setProperty("--map-shift-x", "0px")
-        event.currentTarget.style.setProperty("--map-shift-y", "0px")
-    }
-
     return (
         <>
             <section id="mapa" className="city-map" aria-label="Mapa interativo da cidade">
-                <div
-                    className={`city-map__frame${showHotspotGuides ? " city-map__frame--debug" : ""}`}
-                    onPointerMove={handleMapPointerMove}
-                    onPointerLeave={handleMapPointerLeave}
-                >
-                    {artLoaded ? (
-                        <img
-                            className="city-map__art"
-                            src="/assets/neon-cyberpunk-city-map.png"
-                            alt="Vista panorâmica de uma metrópole cyberpunk iluminada em roxo, azul e magenta, dividida em cinco regiões."
-                            onError={() => setArtLoaded(false)}
-                        />
+                <div className={`city-map__frame${showHotspotGuides ? " city-map__frame--debug" : ""}`}>
+                    {sceneAvailable ? (
+                        <CityEnvironment onFailure={() => setSceneAvailable(false)} />
                     ) : (
                         <div className="city-map__fallback" role="img" aria-label="Prévia estilizada do mapa da metrópole">
                             <div className="city-map__fallback-skyline" />
@@ -181,26 +153,12 @@ export default function CityMap() {
                             <div className="city-map__fallback-title">
                                 <span>GV / CITY NETWORK</span>
                                 <strong>MAPA DA METRÓPOLE</strong>
-                                <small>O cenário será carregado de public/assets/neon-cyberpunk-city-map.png</small>
+                                <small>Não foi possível iniciar o Canvas 2D neste navegador.</small>
                             </div>
                         </div>
                     )}
 
-                    {artLoaded && (
-                        <div className="city-map__ambience" aria-hidden="true">
-                            <span className="city-map__rain" />
-                            <span className="city-map__haze city-map__haze--left" />
-                            <span className="city-map__haze city-map__haze--center" />
-                            <span className="city-map__haze city-map__haze--right" />
-                            <span className="city-map__glow city-map__glow--north" />
-                            <span className="city-map__glow city-map__glow--west" />
-                            <span className="city-map__glow city-map__glow--east" />
-                            <span className="city-map__lightflow city-map__lightflow--violet" />
-                            <span className="city-map__lightflow city-map__lightflow--cyan" />
-                        </div>
-                    )}
-
-                    {artLoaded && (
+                    {sceneAvailable && (
                         <>
                             <svg
                                 className="city-map__image-nav"
@@ -280,7 +238,7 @@ export default function CityMap() {
                         </>
                     )}
 
-                    {!artLoaded && (
+                    {!sceneAvailable && (
                         <nav className="city-map__fallback-regions" aria-label="Selecionar região do mapa">
                             {regions.map((region) => (
                                 <a href={region.target} key={region.id}>
