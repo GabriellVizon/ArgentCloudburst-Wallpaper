@@ -157,6 +157,60 @@ html {
     font-size: 0.85rem;
 }
 
+
+.city-map__fallback-regions {
+    position: absolute;
+    z-index: 2;
+    right: clamp(1rem, 4vw, 3.5rem);
+    bottom: clamp(1rem, 4vw, 3.5rem);
+    left: clamp(1rem, 4vw, 3.5rem);
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+
+.city-map__fallback-regions a {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.8rem;
+    border: 1px solid rgba(190, 132, 255, 0.42);
+    border-radius: 9px;
+    color: #f7efff;
+    background: rgba(16, 8, 29, 0.86);
+    text-decoration: none;
+    backdrop-filter: blur(12px);
+}
+
+.city-map__fallback-regions a:hover,
+.city-map__fallback-regions a:focus-visible {
+    border-color: #d8b2ff;
+    background: rgba(73, 31, 111, 0.9);
+}
+
+.city-map__fallback-regions a:focus-visible {
+    outline: 2px solid #f6eaff;
+    outline-offset: 3px;
+}
+
+.city-map__fallback-regions strong {
+    font-size: 0.82rem;
+}
+
+.city-map__fallback-regions span {
+    color: #c7b3dc;
+    font-size: 0.7rem;
+}
+
+@media (max-width: 760px) {
+    .city-map__fallback-regions {
+        position: relative;
+        inset: auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0.85rem;
+    }
+}
+
 .city-map__mobile-nav {
     display: none;
 }
