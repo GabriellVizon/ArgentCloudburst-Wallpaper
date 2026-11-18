@@ -68,11 +68,6 @@ export default function NeonCity() {
                             tap={79}
                             tapEffect="splash"
                             speed={54}
-                            style={{
-                                mixBlendMode: "screen",
-                                pointerEvents: "none",
-                                opacity: 0.94,
-                            }}
                         />
                     </div>
 
