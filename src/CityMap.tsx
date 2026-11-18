@@ -29,12 +29,9 @@ type MenuLink = {
 }
 
 /**
- * Coordinates are stored in the artwork's native 1648 × 928 coordinate
- * space. The SVG overlay therefore scales with the PNG without recalculating
- * percentages against a potentially different container.
- *
- * Values below are the first calibrated pass, translated from the previous
- * hotspot rectangles. Open the page with ?mapDebug=1 to inspect their bounds.
+ * The Canvas scene uses a logical 824 × 464 pixel-art space. The SVG overlay
+ * uses its 2× viewBox (1648 × 928), so hotspot positions remain aligned with
+ * the district markers rendered by CityLayers. Open ?mapDebug=1 to inspect bounds.
  */
 const regions: Region[] = [
     {
