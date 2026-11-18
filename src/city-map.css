@@ -45,44 +45,68 @@ html {
 .city-map__image-regions {
     position: absolute;
     inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
     pointer-events: none;
 }
 
 .city-map__image-nav a,
 .city-map__image-regions a {
-    position: absolute;
-    display: block;
-    pointer-events: auto;
-    border: 1px solid transparent;
-    border-radius: 12px;
-    background: transparent;
+    pointer-events: all;
+    cursor: pointer;
+    outline: none;
+}
+
+.city-map__hotspot {
+    fill: rgba(165, 74, 255, 0);
+    stroke: rgba(221, 184, 255, 0);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
     transition:
-        background 160ms ease,
-        border-color 160ms ease,
-        box-shadow 160ms ease;
+        fill 180ms ease,
+        stroke 180ms ease,
+        filter 180ms ease;
 }
 
-.city-map__image-nav a {
-    top: 1.3%;
-    height: 6.1%;
+.city-map__image-regions a:hover .city-map__hotspot,
+.city-map__image-nav a:hover .city-map__hotspot {
+    fill: rgba(165, 74, 255, 0.12);
+    stroke: rgba(221, 184, 255, 0.76);
+    filter: drop-shadow(0 0 9px rgba(172, 78, 255, 0.48));
 }
 
-.city-map__image-regions a:hover,
-.city-map__image-nav a:hover {
-    border-color: rgba(221, 184, 255, 0.72);
-    background: rgba(165, 74, 255, 0.11);
-    box-shadow:
-        0 0 20px rgba(172, 78, 255, 0.22),
-        inset 0 0 16px rgba(172, 78, 255, 0.12);
+.city-map__image-regions a:focus-visible .city-map__hotspot,
+.city-map__image-nav a:focus-visible .city-map__hotspot {
+    fill: rgba(165, 74, 255, 0.2);
+    stroke: #f6eaff;
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 12px rgba(172, 78, 255, 0.62));
 }
 
-.city-map__image-regions a:focus-visible,
-.city-map__image-nav a:focus-visible {
-    outline: 2px solid #f6eaff;
-    outline-offset: 2px;
-    border-color: #d9a8ff;
-    background: rgba(165, 74, 255, 0.2);
-    box-shadow: 0 0 26px rgba(172, 78, 255, 0.45);
+.city-map__debug-label {
+    display: none;
+    fill: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    paint-order: stroke;
+    stroke: rgba(12, 7, 23, 0.9);
+    stroke-width: 4px;
+    pointer-events: none;
+}
+
+.city-map__frame--debug .city-map__hotspot {
+    fill: rgba(255, 255, 255, 0.08);
+    stroke: rgba(255, 226, 150, 0.96);
+    stroke-width: 2;
+    stroke-dasharray: 8 5;
+}
+
+.city-map__frame--debug .city-map__debug-label {
+    display: block;
 }
 
 .city-map__fallback {
@@ -424,5 +448,12 @@ html {
 
     .city-chapter__description {
         font-size: 1rem;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    .city-map__hotspot {
+        transition: none;
     }
 }
