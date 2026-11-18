@@ -83,3 +83,11 @@ export const CITY_COLORS = {
 } as const
 
 export const CITY_SEED = 20261118
+
+export const CITY_PARALLAX = {
+    maxOffsetX: 7.5,
+    maxOffsetY: 4.5,
+    smoothingMs: 105,
+    settleThreshold: 0.005,
+    pixelRatioCap: 2,
+} as const

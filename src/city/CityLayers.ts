@@ -457,24 +457,68 @@ function drawVignette(ctx: CanvasRenderingContext2D) {
     ctx.fillRect(0, CITY_SCENE.height - 6, CITY_SCENE.width, 6)
 }
 
+export type CityLayerId =
+    | "sky"
+    | "skyline"
+    | "terrain"
+    | "transit"
+    | "architecture"
+    | "foreground"
+    | "interface"
+
+export const CITY_RENDER_LAYERS: readonly { id: CityLayerId; depth: number }[] = [
+    { id: "sky", depth: 0 },
+    { id: "skyline", depth: 0.18 },
+    { id: "terrain", depth: 0.32 },
+    { id: "transit", depth: 0.52 },
+    { id: "architecture", depth: 0.78 },
+    { id: "foreground", depth: 0.94 },
+    { id: "interface", depth: 0 },
+]
+
+export function renderCityLayer(ctx: CanvasRenderingContext2D, layer: CityLayerId) {
+    ctx.save()
+    ctx.imageSmoothingEnabled = false
+
+    switch (layer) {
+        case "sky":
+            drawSky(ctx, seededRandom(CITY_SEED))
+            break
+        case "skyline":
+            drawFarSkyline(ctx, seededRandom(CITY_SEED + 1))
+            break
+        case "terrain":
+            drawGround(ctx)
+            break
+        case "transit":
+            drawWaterway(ctx)
+            drawElevatedRoads(ctx)
+            break
+        case "architecture":
+            drawDistrictBuildings(ctx)
+            break
+        case "foreground":
+            drawCentralPlaza(ctx)
+            drawStreetDetails(ctx)
+            break
+        case "interface":
+            drawTopNavigation(ctx)
+            for (const district of CITY_DISTRICTS) drawDistrictMarker(ctx, district)
+            drawVignette(ctx)
+            break
+    }
+
+    ctx.restore()
+}
+
 export function renderCityScene(ctx: CanvasRenderingContext2D) {
-    const random = seededRandom(CITY_SEED)
     ctx.save()
     ctx.imageSmoothingEnabled = false
     ctx.clearRect(0, 0, CITY_SCENE.width, CITY_SCENE.height)
 
-    drawSky(ctx, random)
-    drawTopNavigation(ctx)
-    drawFarSkyline(ctx, random)
-    drawGround(ctx)
-    drawWaterway(ctx)
-    drawElevatedRoads(ctx)
-    drawDistrictBuildings(ctx)
-    drawCentralPlaza(ctx)
-    drawStreetDetails(ctx)
+    for (const layer of CITY_RENDER_LAYERS) {
+        renderCityLayer(ctx, layer.id)
+    }
 
-    for (const district of CITY_DISTRICTS) drawDistrictMarker(ctx, district)
-
-    drawVignette(ctx)
     ctx.restore()
 }
