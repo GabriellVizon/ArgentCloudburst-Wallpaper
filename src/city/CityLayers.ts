@@ -253,7 +253,7 @@ function drawBuilding(ctx: CanvasRenderingContext2D, spec: BuildingSpec, seed: n
     }
 }
 
-function drawDistrictBuildings(ctx: CanvasRenderingContext2D) {
+function drawDistrictBuildings(ctx: CanvasRenderingContext2D, plane: "all" | "middle" | "near" = "all") {
     const buildings: BuildingSpec[] = [
         // Technology district — server towers and cool cyan lighting.
         { x: 100, baseY: 326, width: 34, height: 94, depth: 12, hue: "blue", rooftop: "antenna", windows: 0.82 },
@@ -291,13 +291,19 @@ function drawDistrictBuildings(ctx: CanvasRenderingContext2D) {
         { x: 746, baseY: 441, width: 38, height: 55, depth: 12, hue: "blue", rooftop: "antenna", windows: 0.58 },
     ]
 
-    buildings.forEach((building, index) => drawBuilding(ctx, building, 1200 + index * 19))
+    buildings.forEach((building, index) => {
+        const isNear = building.baseY >= 400
+        if (plane !== "all" && (plane === "near") !== isNear) return
+        drawBuilding(ctx, building, 1200 + index * 19)
+    })
 
-    // A central civic tower crown and its vertical beacon.
-    line(ctx, [{ x: 434, y: 73 }, { x: 434, y: 35 }], "#D6C0FF", 2, 0.9)
-    glow(ctx, 434, 35, 28, "rgba(178,125,255,0.9)", 0.28)
-    ctx.fillStyle = "#F2DFFF"
-    ctx.fillRect(431, 32, 6, 4)
+    // Keep the beacon attached to the middle-distance landmark tower.
+    if (plane !== "near") {
+        line(ctx, [{ x: 434, y: 73 }, { x: 434, y: 35 }], "#D6C0FF", 2, 0.9)
+        glow(ctx, 434, 35, 28, "rgba(178,125,255,0.9)", 0.28)
+        ctx.fillStyle = "#F2DFFF"
+        ctx.fillRect(431, 32, 6, 4)
+    }
 }
 
 function drawElevatedRoads(ctx: CanvasRenderingContext2D) {
@@ -495,9 +501,10 @@ export function renderCityLayer(ctx: CanvasRenderingContext2D, layer: CityLayerI
             drawElevatedRoads(ctx)
             break
         case "architecture":
-            drawDistrictBuildings(ctx)
+            drawDistrictBuildings(ctx, "middle")
             break
         case "foreground":
+            drawDistrictBuildings(ctx, "near")
             drawCentralPlaza(ctx)
             drawStreetDetails(ctx)
             break
