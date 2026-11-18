@@ -664,7 +664,8 @@ html {
 
     .city-map__rain,
     .city-map__haze,
-    .city-map__glow {
+    .city-map__glow,
+    .city-map__lightflow {
         animation: none;
     }
 }
