@@ -586,7 +586,19 @@ html {
 
 
 @media (prefers-reduced-motion: reduce) {
-    .city-map__hotspot {
+    .city-map__hotspot,
+    .city-map__ambience {
         transition: none;
+    }
+
+    .city-map__ambience {
+        transform: none;
+        will-change: auto;
+    }
+
+    .city-map__rain,
+    .city-map__haze,
+    .city-map__glow {
+        animation: none;
     }
 }
