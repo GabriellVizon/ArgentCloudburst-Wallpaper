@@ -155,6 +155,14 @@ function drawFarSkyline(ctx: CanvasRenderingContext2D, random: Random) {
         }
         x += width + int(random() * 5)
     }
+
+    // Atmospheric perspective: distant structures soften into the violet horizon.
+    const haze = ctx.createLinearGradient(0, 164, 0, 232)
+    haze.addColorStop(0, "rgba(86,58,127,0)")
+    haze.addColorStop(0.58, "rgba(109,76,151,0.08)")
+    haze.addColorStop(1, "rgba(120,83,158,0.24)")
+    ctx.fillStyle = haze
+    ctx.fillRect(0, 164, CITY_SCENE.width, 68)
 }
 
 function drawGround(ctx: CanvasRenderingContext2D) {
@@ -163,11 +171,13 @@ function drawGround(ctx: CanvasRenderingContext2D) {
 
     // Broad, low-contrast city blocks and an isometric planning grid.
     for (let y = 238; y < CITY_SCENE.height; y += 28) {
-        line(ctx, [{ x: 0, y }, { x: CITY_SCENE.width, y: y - 8 }], "rgba(105,80,145,0.17)", 1)
+        const depth = (y - 238) / (CITY_SCENE.height - 238)
+        const alpha = 0.08 + depth * 0.11
+        line(ctx, [{ x: 0, y }, { x: CITY_SCENE.width, y: y - 8 }], `rgba(125,96,166,${alpha.toFixed(3)})`, 1)
     }
     for (let x = -180; x < CITY_SCENE.width + 180; x += 54) {
-        line(ctx, [{ x, y: 220 }, { x: x + 170, y: CITY_SCENE.height }], "rgba(105,80,145,0.11)", 1)
-        line(ctx, [{ x, y: 220 }, { x: x - 170, y: CITY_SCENE.height }], "rgba(105,80,145,0.08)", 1)
+        line(ctx, [{ x, y: 220 }, { x: x + 170, y: CITY_SCENE.height }], "rgba(125,96,166,0.12)", 1)
+        line(ctx, [{ x, y: 220 }, { x: x - 170, y: CITY_SCENE.height }], "rgba(125,96,166,0.09)", 1)
     }
 
     // Low silhouettes establish blocks between the five districts.
@@ -294,7 +304,10 @@ function drawDistrictBuildings(ctx: CanvasRenderingContext2D, plane: "all" | "mi
     buildings.forEach((building, index) => {
         const isNear = building.baseY >= 400
         if (plane !== "all" && (plane === "near") !== isNear) return
+        ctx.save()
+        if (!isNear) ctx.globalAlpha = 0.88
         drawBuilding(ctx, building, 1200 + index * 19)
+        ctx.restore()
     })
 
     // Keep the beacon attached to the middle-distance landmark tower.
@@ -472,14 +485,15 @@ export type CityLayerId =
     | "foreground"
     | "interface"
 
-export const CITY_RENDER_LAYERS: readonly { id: CityLayerId; depth: number }[] = [
-    { id: "sky", depth: 0 },
-    { id: "skyline", depth: 0.18 },
-    { id: "terrain", depth: 0.32 },
-    { id: "transit", depth: 0.52 },
-    { id: "architecture", depth: 0.78 },
-    { id: "foreground", depth: 0.94 },
-    { id: "interface", depth: 0 },
+// Independent drawing planes are kept separate for future weather, lighting and local motion.
+export const CITY_RENDER_LAYERS: readonly { id: CityLayerId }[] = [
+    { id: "sky" },
+    { id: "skyline" },
+    { id: "terrain" },
+    { id: "transit" },
+    { id: "architecture" },
+    { id: "foreground" },
+    { id: "interface" },
 ]
 
 export function renderCityLayer(ctx: CanvasRenderingContext2D, layer: CityLayerId) {
