@@ -1,0 +1,185 @@
+:root {
+    color-scheme: dark;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    color: #F3EFF8;
+    background: #0B0812;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100%;
+    margin: 0;
+}
+
+html,
+body {
+    background: #0B0812;
+}
+
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+#root {
+    min-height: 100svh;
+}
+
+.neon-city {
+    min-height: 100vh;
+    min-height: 100svh;
+    background: #0B0812;
+}
+
+.neon-hero {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    min-height: 100svh;
+    overflow: hidden;
+    background: #0B0812;
+}
+
+.neon-scene {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: #0B0812;
+}
+
+.neon-scene__skyline,
+.neon-scene__rain {
+    position: absolute;
+    inset: 0;
+}
+
+.neon-scene__skyline {
+    z-index: 0;
+}
+
+.neon-scene__skyline > div {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+}
+
+.neon-scene__rain {
+    z-index: 1;
+    opacity: 0.94;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+.neon-scene__rain > div {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.neon-scene__shade {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(8, 5, 15, 0.94) 0%,
+            rgba(8, 5, 15, 0.78) 27%,
+            rgba(8, 5, 15, 0.32) 54%,
+            rgba(8, 5, 15, 0.04) 78%,
+            transparent 100%
+        ),
+        linear-gradient(
+            0deg,
+            rgba(8, 5, 15, 0.56) 0%,
+            rgba(8, 5, 15, 0.08) 42%,
+            transparent 74%
+        );
+}
+
+.neon-hero__content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: min(1360px, 100%);
+    min-height: 100vh;
+    min-height: 100svh;
+    margin: 0 auto;
+    padding: clamp(2rem, 7vw, 7rem);
+    pointer-events: none;
+}
+
+.neon-hero__content h1 {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    color: #F4F0F8;
+    font-size: clamp(3.2rem, 7.2vw, 7rem);
+    font-weight: 750;
+    letter-spacing: -0.075em;
+    line-height: 0.94;
+    text-wrap: balance;
+    text-shadow: 0 8px 42px rgba(4, 2, 9, 0.62);
+}
+
+.neon-hero__surname {
+    color: #D6CCDF;
+    text-shadow:
+        0 0 28px rgba(190, 155, 226, 0.22),
+        0 8px 42px rgba(4, 2, 9, 0.62);
+}
+
+.neon-hero__content p {
+    max-width: 36rem;
+    margin: 1.65rem 0 0;
+    color: #D0C7D8;
+    font-size: clamp(1rem, 1.55vw, 1.3rem);
+    font-weight: 400;
+    line-height: 1.65;
+    text-shadow: 0 4px 24px rgba(4, 2, 9, 0.9);
+}
+
+@media (max-width: 760px) {
+    .neon-scene__shade {
+        background:
+            linear-gradient(
+                90deg,
+                rgba(8, 5, 15, 0.84),
+                rgba(8, 5, 15, 0.36) 72%,
+                rgba(8, 5, 15, 0.14)
+            ),
+            linear-gradient(
+                0deg,
+                rgba(8, 5, 15, 0.48),
+                transparent 62%
+            );
+    }
+
+    .neon-hero__content {
+        padding: 2rem 1.5rem;
+    }
+
+    .neon-hero__content h1 {
+        font-size: clamp(3rem, 11vw, 5.2rem);
+    }
+
+    .neon-hero__content p {
+        max-width: 29rem;
+        margin-top: 1.25rem;
+        font-size: 1rem;
+    }
+}

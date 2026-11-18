@@ -857,47 +857,58 @@ function __OriginkitBase_PixelParallaxSkyline(props: any) {
         }
         raf = requestAnimationFrame(loop)
 
+        const updatePointer = (e: PointerEvent) => {
+            const rect = root.getBoundingClientRect()
+            const inside =
+                rect.width > 0 &&
+                rect.height > 0 &&
+                e.clientX >= rect.left &&
+                e.clientX <= rect.right &&
+                e.clientY >= rect.top &&
+                e.clientY <= rect.bottom
+
+            const P = ptr.current
+            if (!inside) {
+                P.tover = 0
+                P.tx = 0.5
+                P.ty = 0.5
+                return false
+            }
+
+            P.tx = clamp((e.clientX - rect.left) / rect.width, 0, 1)
+            P.ty = clamp((e.clientY - rect.top) / rect.height, 0, 1)
+            P.tover = 1
+            return true
+        }
+        const onGlobalPointerDown = (e: PointerEvent) => {
+            if (!updatePointer(e)) return
+            const P = ptr.current
+            P.down = true
+            P.kick = 1
+            P.ripples.push({ x: P.tx, y: P.ty, t: 0 })
+            if (P.ripples.length > 4) P.ripples.shift()
+        }
         const release = () => {
             ptr.current.down = false
         }
+
+        window.addEventListener("pointermove", updatePointer, { passive: true })
+        window.addEventListener("pointerdown", onGlobalPointerDown, { passive: true })
         window.addEventListener("pointerup", release)
         window.addEventListener("pointercancel", release)
         return () => {
             cancelAnimationFrame(raf)
             ro.disconnect()
+            window.removeEventListener("pointermove", updatePointer)
+            window.removeEventListener("pointerdown", onGlobalPointerDown)
             window.removeEventListener("pointerup", release)
             window.removeEventListener("pointercancel", release)
         }
     }, [])
 
-    const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
-        const el = rootRef.current
-        if (!el) return
-        const w = el.offsetWidth || 1
-        const h = el.offsetHeight || 1
-        ptr.current.tx = clamp(e.nativeEvent.offsetX / w, 0, 1)
-        ptr.current.ty = clamp(e.nativeEvent.offsetY / h, 0, 1)
-        ptr.current.tover = 1
-    }
-
     return (
         <div
             ref={rootRef}
-            onPointerMove={onMove}
-            onPointerEnter={onMove}
-            onPointerLeave={() => {
-                ptr.current.tover = 0
-                ptr.current.tx = 0.5
-                ptr.current.ty = 0.5
-            }}
-            onPointerDown={(e) => {
-                onMove(e)
-                const P = ptr.current
-                P.down = true
-                P.kick = 1
-                P.ripples.push({ x: P.tx, y: P.ty, t: 0 })
-                if (P.ripples.length > 4) P.ripples.shift()
-            }}
             style={{
                 position: "relative",
                 width: "100%",

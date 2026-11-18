@@ -1082,7 +1082,26 @@ function __OriginkitBase_ArgentCloudburst(props: Props) {
         }
         document.addEventListener("visibilitychange", onVis)
 
+        const onLeave = () => {
+            inside = false
+            held = false
+            start()
+        }
         const onMove = (e: PointerEvent) => {
+            const r = root.getBoundingClientRect()
+            const over =
+                r.width > 0 &&
+                r.height > 0 &&
+                e.clientX >= r.left &&
+                e.clientX <= r.right &&
+                e.clientY >= r.top &&
+                e.clientY <= r.bottom
+
+            if (!over) {
+                if (inside || held) onLeave()
+                return
+            }
+
             // Chrome re-sends moves at the same spot after layout; a resting cursor must not keep the loop awake.
             if (inside && e.clientX === cx && e.clientY === cy) return
             cx = e.clientX
@@ -1093,14 +1112,23 @@ function __OriginkitBase_ArgentCloudburst(props: Props) {
             start()
         }
         const onDown = (e: PointerEvent) => {
+            const r = root.getBoundingClientRect()
+            const over =
+                r.width > 0 &&
+                r.height > 0 &&
+                e.clientX >= r.left &&
+                e.clientX <= r.right &&
+                e.clientY >= r.top &&
+                e.clientY <= r.bottom
+            if (!over) return
+
             onMove(e)
             moved = true
             held = true
             // A click or tap sends a splash ring out from where it landed.
             if (e.button <= 0) {
                 const amt = (clamp(num(propsRef.current.tap, DEFAULTS.tap), 0, 100) / 50) * (reduced ? 0.5 : 1)
-                const r = root.getBoundingClientRect()
-                if (amt > 0 && r.width > 0 && r.height > 0) {
+                if (amt > 0) {
                     const o = (tapNext++ % TAP_SLOTS) * 4
                     taps[o] = (e.clientX - r.left) / r.width
                     taps[o + 1] = (e.clientY - r.top) / r.height
@@ -1110,17 +1138,6 @@ function __OriginkitBase_ArgentCloudburst(props: Props) {
                     tapDirty = true
                 }
             }
-            // Keep the release even if the press drags off the frame.
-            try {
-                root.setPointerCapture(e.pointerId)
-            } catch {
-                // Capture is a nicety; without it pointerleave still ends the press.
-            }
-            start()
-        }
-        const onLeave = () => {
-            inside = false
-            held = false
             start()
         }
         const onUp = (e: PointerEvent) => {
@@ -1129,14 +1146,17 @@ function __OriginkitBase_ArgentCloudburst(props: Props) {
             if (e.pointerType !== "mouse") onLeave()
             start()
         }
+        const onWindowOut = (e: PointerEvent) => {
+            if (!e.relatedTarget) onLeave()
+        }
         const onScroll = () => {
             scrolled = true
         }
-        root.addEventListener("pointermove", onMove, { passive: true })
-        root.addEventListener("pointerdown", onDown, { passive: true })
-        root.addEventListener("pointerup", onUp)
-        root.addEventListener("pointerleave", onLeave)
-        root.addEventListener("pointercancel", onLeave)
+        window.addEventListener("pointermove", onMove, { passive: true })
+        window.addEventListener("pointerdown", onDown, { passive: true })
+        window.addEventListener("pointerup", onUp)
+        window.addEventListener("pointercancel", onLeave)
+        window.addEventListener("pointerout", onWindowOut)
         window.addEventListener("scroll", onScroll, { passive: true, capture: true })
 
         // Survive a lost GPU context: pause, then rebuild on restore.
@@ -1159,11 +1179,11 @@ function __OriginkitBase_ArgentCloudburst(props: Props) {
             ro.disconnect()
             io?.disconnect()
             document.removeEventListener("visibilitychange", onVis)
-            root.removeEventListener("pointermove", onMove)
-            root.removeEventListener("pointerdown", onDown)
-            root.removeEventListener("pointerup", onUp)
-            root.removeEventListener("pointerleave", onLeave)
-            root.removeEventListener("pointercancel", onLeave)
+            window.removeEventListener("pointermove", onMove)
+            window.removeEventListener("pointerdown", onDown)
+            window.removeEventListener("pointerup", onUp)
+            window.removeEventListener("pointercancel", onLeave)
+            window.removeEventListener("pointerout", onWindowOut)
             window.removeEventListener("scroll", onScroll, { capture: true })
             canvas.removeEventListener("webglcontextlost", onLost)
             canvas.removeEventListener("webglcontextrestored", onRestored)
