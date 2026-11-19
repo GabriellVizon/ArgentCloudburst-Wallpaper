@@ -107,6 +107,7 @@ const junctions: readonly { x: number; y: number; width: number; height: number 
     { x: 254, y: 260, width: 18, height: 13 },
     { x: 320, y: 349, width: 16, height: 12 },
     { x: 558, y: 272, width: 16, height: 12 },
+    { x: 565, y: 344, width: 15, height: 11 },
 ]
 
 const bridgeSupports = [414, 447, 480]
@@ -284,12 +285,12 @@ function drawBridgeRails(ctx: CanvasRenderingContext2D) {
     ctx.stroke()
     ctx.restore()
 
-    // Rail uprights are drawn last so they remain visible over the bridge deck.
-    for (let index = 1; index < bridge.points.length - 1; index++) {
-        const point = bridge.points[index]
+    // Evenly spaced rail uprights remain visible along the straight bridge span.
+    for (const supportX of bridgeSupports) {
+        const deckY = 367
         ctx.fillStyle = "rgba(194,169,220,0.72)"
-        ctx.fillRect(int(point.x), int(point.y - bridge.width / 2 - 4), 1, 3)
-        ctx.fillRect(int(point.x), int(point.y + bridge.width / 2 + 2), 1, 3)
+        ctx.fillRect(int(supportX), int(deckY - bridge.width / 2 - 4), 1, 3)
+        ctx.fillRect(int(supportX), int(deckY + bridge.width / 2 + 2), 1, 3)
     }
 }
 export function drawRoadNetwork(ctx: CanvasRenderingContext2D) {
