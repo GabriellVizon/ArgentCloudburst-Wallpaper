@@ -1,0 +1,118 @@
+{
+  "compressionlevel": -1,
+  "height": 58,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "image": "../../../public/assets/neon-cyberpunk-city-map.png",
+      "name": "00 - Referencia visual",
+      "opacity": 0.92,
+      "type": "imagelayer",
+      "visible": true,
+      "offsetx": 0,
+      "offsety": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 2,
+      "name": "01 - Eixos viarios",
+      "color": "#65CFF4",
+      "objects": [],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 3,
+      "name": "02 - Superficies de ruas e calcadas",
+      "color": "#E5B8FF",
+      "objects": [],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 4,
+      "name": "03 - Canal, margens e travessias",
+      "color": "#69B8F1",
+      "objects": [],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 5,
+      "name": "04 - Quadras e volumes",
+      "color": "#C5A5EA",
+      "objects": [],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 6,
+      "name": "05 - Marcos visuais e elementos urbanos",
+      "color": "#F0B6DA",
+      "objects": [],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
+      "name": "06 - Distritos e hotspots",
+      "color": "#F2D28B",
+      "objects": [],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 8,
+  "nextobjectid": 1,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.12.2",
+  "tileheight": 16,
+  "tilesets": [],
+  "tilewidth": 16,
+  "type": "map",
+  "version": "1.10",
+  "width": 103,
+  "backgroundcolor": "#0B0812",
+  "properties": [
+    {
+      "name": "prototypeOnly",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "name": "coordinateSpace",
+      "type": "string",
+      "value": "1648x928 (SVG viewBox atual)"
+    },
+    {
+      "name": "purpose",
+      "type": "string",
+      "value": "Blockout visual; ainda nao e o mapa de producao"
+    }
+  ]
+}
