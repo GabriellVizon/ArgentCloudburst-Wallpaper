@@ -14,9 +14,9 @@ Este workspace e uma area de experimentacao visual. Ele **nao substitui** o mapa
 
 - Coordenadas de trabalho: **1648 × 928**, alinhadas ao `viewBox` usado atualmente pelos hotspots de `CityMap.tsx`.
 - Grade: **16 × 16 px**, apenas como guia de alinhamento.
-- Orientacao inicial do Tiled: **Orthogonal**. Isso nao determina a perspectiva artistica final; foi escolhido para manter os objetos em coordenadas de pixel diretas enquanto fazemos o trace da referencia.
-- A perspectiva final (panoramica/obliqua ou isometrica) so sera fechada depois de um primeiro bloco visual aprovado.
-- Nenhuma dependencia de renderizacao foi adicionada nesta etapa.
+- Orientacao do Tiled: **Orthogonal**, usada somente como plano de coordenadas 2D. A composicao desenhada sobre ela e panoramica/obliqua, acompanhando a direcao visual definida para a cidade.
+- O primeiro passe ja contem eixos viarios, faixas de rua, canal, ponte, zonas dos cinco distritos, quadras-placeholder, marcos arquitetonicos e hotspots de navegacao.
+- Os objetos sao guias editaveis, nao arte final. A posicao e a silhueta precisam ser conferidas sobre a referencia no Tiled antes de qualquer integracao.
 
 ## Camadas
 
