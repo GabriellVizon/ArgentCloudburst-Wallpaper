@@ -1,4 +1,5 @@
 import { CITY_COLORS, CITY_DISTRICTS, CITY_SCENE, CITY_SEED, type CityDistrict } from "./city-config"
+import { drawRoadNetwork } from "./RoadNetwork"
 
 type Point = { x: number; y: number }
 type BuildingSpec = {
@@ -411,65 +412,6 @@ function drawDistantDistrictBlocks(ctx: CanvasRenderingContext2D) {
     }
 }
 
-function drawElevatedRoads(ctx: CanvasRenderingContext2D) {
-    const mainRoads: Point[][] = [
-        [{ x: -20, y: 244 }, { x: 82, y: 236 }, { x: 173, y: 255 }, { x: 267, y: 250 }, { x: 355, y: 272 }, { x: 462, y: 258 }, { x: 560, y: 276 }, { x: 674, y: 258 }, { x: 844, y: 270 }],
-        [{ x: 260, y: 206 }, { x: 309, y: 225 }, { x: 362, y: 235 }, { x: 416, y: 257 }, { x: 464, y: 272 }, { x: 514, y: 305 }],
-        [{ x: 518, y: 286 }, { x: 582, y: 303 }, { x: 645, y: 307 }, { x: 716, y: 298 }, { x: 840, y: 326 }],
-    ]
-
-    // Road decks become subtly broader toward the viewer.
-    for (const points of mainRoads) {
-        for (let index = 0; index < points.length - 1; index++) {
-            const start = points[index]
-            const end = points[index + 1]
-            const averageY = (start.y + end.y) / 2
-            const depth = Math.max(0, Math.min(1, (averageY - 220) / 244))
-            const deckWidth = 8 + depth * 4
-
-            line(ctx, [start, end], "rgba(4,3,12,0.58)", deckWidth + 7)
-            line(ctx, [start, end], "rgba(128,72,180,0.34)", deckWidth + 3)
-            line(ctx, [start, end], "#191827", deckWidth)
-            line(ctx, [start, end], "rgba(183,124,231,0.42)", 1)
-        }
-    }
-
-    const avenue = mainRoads[0]
-    for (let index = 0; index < avenue.length - 1; index++) {
-        const a = avenue[index]
-        const b = avenue[index + 1]
-        const length = Math.hypot(b.x - a.x, b.y - a.y)
-        const steps = Math.max(1, int(length / 19))
-        for (let step = 0; step < steps; step++) {
-            const t = step / steps
-            const x = int(a.x + (b.x - a.x) * t)
-            const y = int(a.y + (b.y - a.y) * t)
-            ctx.fillStyle = step % 2 === 0 ? "rgba(215,176,255,0.72)" : "rgba(110,190,255,0.5)"
-            ctx.fillRect(x, y - 1, 4, 2)
-        }
-    }
-
-    // Bridge supports enter the water plane before the deck.
-    for (const supportX of [414, 447, 480]) {
-        ctx.fillStyle = "rgba(7,5,18,0.78)"
-        ctx.fillRect(supportX - 2, 373, 4, 14)
-        ctx.fillStyle = "rgba(139,101,179,0.42)"
-        ctx.fillRect(supportX - 1, 374, 1, 11)
-    }
-
-    // Bridge deck crossing the southern waterway.
-    ctx.fillStyle = "rgba(3,2,10,0.55)"
-    ctx.fillRect(391, 374, 112, 5)
-    ctx.fillStyle = "#27223D"
-    ctx.fillRect(395, 367, 104, 8)
-    ctx.fillStyle = "#8B65B3"
-    ctx.fillRect(395, 367, 104, 1)
-    ctx.fillStyle = "rgba(120,202,255,0.72)"
-    for (let x = 402; x < 496; x += 12) ctx.fillRect(x, 365, 2, 2)
-    ctx.fillStyle = "#121020"
-    ctx.fillRect(402, 375, 92, 3)
-}
-
 function drawWaterway(ctx: CanvasRenderingContext2D) {
     const banks: Point[] = [
         { x: -30, y: 400 },
@@ -629,7 +571,7 @@ export function renderCityLayer(ctx: CanvasRenderingContext2D, layer: CityLayerI
             break
         case "transit":
             drawWaterway(ctx)
-            drawElevatedRoads(ctx)
+            drawRoadNetwork(ctx)
             break
         case "architecture":
             drawDistrictBuildings(ctx, "middle")
