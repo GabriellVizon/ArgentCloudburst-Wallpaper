@@ -66,9 +66,23 @@ const roads: readonly RoadDefinition[] = [
         markings: false,
         points: [
             { x: 254, y: 260 },
-            { x: 274, y: 286 },
-            { x: 292, y: 318 },
+            { x: 222, y: 279 },
+            { x: 197, y: 306 },
+            { x: 196, y: 334 },
+            { x: 224, y: 349 },
             { x: 320, y: 349 },
+        ],
+    },
+    {
+        id: "east-waterfront-link",
+        kind: "connector",
+        width: 10,
+        markings: false,
+        points: [
+            { x: 558, y: 272 },
+            { x: 548, y: 296 },
+            { x: 548, y: 322 },
+            { x: 565, y: 344 },
         ],
     },
     {
@@ -92,6 +106,7 @@ const junctions: readonly { x: number; y: number; width: number; height: number 
     { x: 454, y: 265, width: 24, height: 16 },
     { x: 254, y: 260, width: 18, height: 13 },
     { x: 320, y: 349, width: 16, height: 12 },
+    { x: 558, y: 272, width: 16, height: 12 },
 ]
 
 const bridgeSupports = [414, 447, 480]
@@ -112,34 +127,49 @@ function offsetEdges(points: readonly RoadPoint[], width: number): RoadEdge {
         const point = points[index]
         const previous = points[Math.max(0, index - 1)]
         const next = points[Math.min(points.length - 1, index + 1)]
+
+        // Open endpoints use the normal of their one connected segment.
+        if (index === 0 || index === points.length - 1) {
+            const direction = index === 0
+                ? normalize(next.x - point.x, next.y - point.y)
+                : normalize(point.x - previous.x, point.y - previous.y)
+            const normal = { x: -direction.y, y: direction.x }
+
+            left.push({
+                x: point.x + normal.x * halfWidth,
+                y: point.y + normal.y * halfWidth,
+            })
+            right.push({
+                x: point.x - normal.x * halfWidth,
+                y: point.y - normal.y * halfWidth,
+            })
+            continue
+        }
+
         const before = normalize(point.x - previous.x, point.y - previous.y)
         const after = normalize(next.x - point.x, next.y - point.y)
-
         const normalBefore = { x: -before.y, y: before.x }
         const normalAfter = { x: -after.y, y: after.x }
-        const miter = normalize(
+        const normalSum = normalize(
             normalBefore.x + normalAfter.x,
             normalBefore.y + normalAfter.y,
         )
-        const denominator = Math.max(
-            0.38,
-            Math.abs(miter.x * normalAfter.x + miter.y * normalAfter.y),
-        )
-        const miterLength = Math.min(halfWidth * 2.2, halfWidth / denominator)
+        const dot = normalSum.x * normalAfter.x + normalSum.y * normalAfter.y
+        const denominator = Math.max(0.42, Math.abs(dot))
+        const miterLength = Math.min(halfWidth * 2, halfWidth / denominator)
 
         left.push({
-            x: point.x + miter.x * miterLength,
-            y: point.y + miter.y * miterLength,
+            x: point.x + normalSum.x * miterLength,
+            y: point.y + normalSum.y * miterLength,
         })
         right.push({
-            x: point.x - miter.x * miterLength,
-            y: point.y - miter.y * miterLength,
+            x: point.x - normalSum.x * miterLength,
+            y: point.y - normalSum.y * miterLength,
         })
     }
 
     return { left, right, outline: [...left, ...right.reverse()] }
 }
-
 function tracePolygon(ctx: CanvasRenderingContext2D, points: readonly RoadPoint[]) {
     if (points.length < 3) return
     ctx.beginPath()
@@ -167,46 +197,6 @@ function tracePolyline(ctx: CanvasRenderingContext2D, points: readonly RoadPoint
     for (let index = 1; index < points.length; index++) {
         ctx.lineTo(int(points[index].x), int(points[index].y))
     }
-}
-
-function drawRoadLayer(
-    ctx: CanvasRenderingContext2D,
-    road: RoadDefinition,
-    edges: RoadEdge,
-) {
-    const isBridge = road.kind === "bridge"
-    const shoulderWidth = road.width + (road.kind === "arterial" ? 8 : 6)
-
-    // A compact contact shadow separates the road deck from the city blocks.
-    ctx.save()
-    ctx.translate(0, isBridge ? 4 : 3)
-    fillRoadPolygon(ctx, offsetEdges(road.points, shoulderWidth + 5).outline, "rgba(3,2,10,0.52)")
-    ctx.restore()
-
-    // Shoulder and curb are separate surfaces, so intersections can merge cleanly.
-    fillRoadPolygon(
-        ctx,
-        offsetEdges(road.points, shoulderWidth).outline,
-        isBridge ? "#463457" : "#392A4A",
-    )
-    fillRoadPolygon(
-        ctx,
-        offsetEdges(road.points, road.width + 2).outline,
-        "#211B31",
-    )
-    fillRoadPolygon(ctx, edges.outline, isBridge ? "#202033" : "#171827")
-
-    // Fine edge strips add a stable visual boundary to the asphalt.
-    ctx.save()
-    ctx.strokeStyle = "rgba(194,154,225,0.36)"
-    ctx.lineWidth = 1
-    ctx.lineCap = "square"
-    ctx.lineJoin = "bevel"
-    tracePolyline(ctx, edges.left)
-    ctx.stroke()
-    tracePolyline(ctx, edges.right)
-    ctx.stroke()
-    ctx.restore()
 }
 
 function drawLaneMarkings(ctx: CanvasRenderingContext2D, road: RoadDefinition) {
@@ -269,53 +259,67 @@ function drawJunction(ctx: CanvasRenderingContext2D, junction: typeof junctions[
     ctx.fillRect(int(x - 2), int(y - 1), 4, 2)
 }
 
-function drawBridgeStructure(ctx: CanvasRenderingContext2D) {
-    const bridge = roads.find((road) => road.id === "canal-bridge")
-    if (!bridge) return
-    const edges = offsetEdges(bridge.points, bridge.width + 5)
-
-    // The piers descend into the water and sit beneath the bridge deck.
+function drawBridgeSupports(ctx: CanvasRenderingContext2D) {
     for (const supportX of bridgeSupports) {
         ctx.fillStyle = "rgba(5,4,15,0.74)"
         ctx.fillRect(supportX - 3, 370, 6, 22)
         ctx.fillStyle = "rgba(143,109,178,0.52)"
         ctx.fillRect(supportX - 1, 372, 1, 17)
     }
+}
+
+function drawBridgeRails(ctx: CanvasRenderingContext2D) {
+    const bridge = roads.find((road) => road.id === "canal-bridge")
+    if (!bridge) return
+    const edges = offsetEdges(bridge.points, bridge.width + 5)
 
     ctx.save()
-    ctx.strokeStyle = "rgba(205,177,235,0.58)"
+    ctx.strokeStyle = "rgba(205,177,235,0.62)"
     ctx.lineWidth = 1
     ctx.lineCap = "square"
+    ctx.lineJoin = "bevel"
     tracePolyline(ctx, edges.left)
     ctx.stroke()
     tracePolyline(ctx, edges.right)
     ctx.stroke()
     ctx.restore()
 
-    // Short rail uprights keep the bridge readable at pixel-art scale.
+    // Rail uprights are drawn last so they remain visible over the bridge deck.
     for (let index = 1; index < bridge.points.length - 1; index++) {
         const point = bridge.points[index]
-        ctx.fillStyle = "rgba(194,169,220,0.64)"
+        ctx.fillStyle = "rgba(194,169,220,0.72)"
         ctx.fillRect(int(point.x), int(point.y - bridge.width / 2 - 4), 1, 3)
         ctx.fillRect(int(point.x), int(point.y + bridge.width / 2 + 2), 1, 3)
     }
 }
-
 export function drawRoadNetwork(ctx: CanvasRenderingContext2D) {
     const roadEdges = roads.map((road) => ({
         road,
         edges: offsetEdges(road.points, road.width),
     }))
 
-    // Bridges receive their support columns before the deck is painted.
-    drawBridgeStructure(ctx)
+    // Bridge piers are behind the deck, inside the channel.
+    drawBridgeSupports(ctx)
 
-    // Pass one: all shoulders; pass two: all asphalt. This avoids line-on-line joins.
-    for (const { road, edges } of roadEdges) {
+    // Pass one: soft contact shadows keep every road grounded on the terrain.
+    for (const { road } of roadEdges) {
+        const shoulderWidth = road.width + (road.kind === "arterial" ? 8 : 6)
+        ctx.save()
+        ctx.translate(0, road.kind === "bridge" ? 4 : 3)
+        fillRoadPolygon(
+            ctx,
+            offsetEdges(road.points, shoulderWidth + 5).outline,
+            "rgba(3,2,10,0.48)",
+        )
+        ctx.restore()
+    }
+
+    // Pass two: continuous curb shoulders, followed by the shared asphalt surfaces.
+    for (const { road } of roadEdges) {
         fillRoadPolygon(
             ctx,
             offsetEdges(road.points, road.width + (road.kind === "arterial" ? 8 : 6)).outline,
-            "rgba(57,42,74,0.96)",
+            road.kind === "bridge" ? "#463457" : "#392A4A",
         )
     }
 
@@ -323,10 +327,10 @@ export function drawRoadNetwork(ctx: CanvasRenderingContext2D) {
         fillRoadPolygon(ctx, edges.outline, road.kind === "bridge" ? "#202033" : "#171827")
     }
 
-    // Junction pads unify branches into one connected street surface.
+    // Junction pads unify the branches into one connected street surface.
     for (const junction of junctions) drawJunction(ctx, junction)
 
-    // Final edge and marking passes sit above the shared asphalt intersections.
+    // Pass three: edge strips and lane markings are kept above the intersections.
     for (const { road, edges } of roadEdges) {
         ctx.save()
         ctx.strokeStyle = "rgba(194,154,225,0.36)"
@@ -341,7 +345,8 @@ export function drawRoadNetwork(ctx: CanvasRenderingContext2D) {
         drawLaneMarkings(ctx, road)
     }
 
-    // The bridge deck gets a restrained luminous cap at its two abutments.
+    // Bridge rails and abutment lights finish the elevated crossing.
+    drawBridgeRails(ctx)
     for (const x of [395, 499]) {
         ctx.fillStyle = "rgba(133,205,255,0.72)"
         ctx.fillRect(x - 2, 358, 4, 2)
