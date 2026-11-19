@@ -1,48 +1,30 @@
-# City Map — Tiled Prototype
+# City Map — Tiled Workspace
 
-Este workspace e uma area de experimentacao visual. Ele **nao substitui** o mapa que esta em producao e nao altera a Hero.
+O mapa de produção permanece intacto. Esta pasta contém a construção visual da cidade no Tiled.
 
-## Abrir
+## Abrir o Distrito Tecnológico
 
-1. Instale o [Tiled Map Editor](https://www.mapeditor.org/).
-2. Abra `ArgentCloudburst-City.tiled-project`.
-3. Abra `maps/MetroBlockout.tmj`.
-4. A camada `00 - Referencia visual` carrega a imagem existente em `public/assets/neon-cyberpunk-city-map.png`. Mantenha essa camada como referencia e evite move-la.
-5. Use as camadas de objetos para desenhar e revisar a geometria por cima da referencia.
+1. Abra `ArgentCloudburst-City.tiled-project` no Tiled.
+2. Abra `maps/TechnologyDistrict.tmj`.
+3. O tileset `TechnologyDistrict` usa sprites SVG separados em `tiles/`.
+4. Ative/desative as camadas para estudar o piso, a malha viária, os edifícios e a navegação.
 
-## Decisoes iniciais
+## Perspectiva e organização
 
-- Coordenadas de trabalho: **1648 × 928**, alinhadas ao `viewBox` usado atualmente pelos hotspots de `CityMap.tsx`.
-- Grade: **16 × 16 px**, apenas como guia de alinhamento.
-- Orientacao do Tiled: **Orthogonal**, usada somente como plano de coordenadas 2D. A composicao desenhada sobre ela e panoramica/obliqua, acompanhando a direcao visual definida para a cidade.
-- O primeiro passe ja contem eixos viarios, faixas de rua, canal, ponte, zonas dos cinco distritos, quadras-placeholder, marcos arquitetonicos e hotspots de navegacao.
-- Os objetos sao guias editaveis, nao arte final. A posicao e a silhueta precisam ser conferidas sobre a referencia no Tiled antes de qualquer integracao.
+- Projeção do mapa: Orthogonal como plano de edição; os sprites usam volumes e fachadas em perspectiva oblíqua/2.5D.
+- Grade: 32 × 32 px.
+- Mapa de trabalho: 1024 × 768 px.
+- Os edifícios são objetos de tile independentes, ancorados pela base, para permitir reposicionamento sem redesenhar a arte.
+- A malha viária fica na camada de piso; os edifícios e elementos de rua são camadas separadas.
+- O primeiro recorte não inclui canal. A infraestrutura hídrica só será adicionada quando a posição e a relação com as quadras estiverem definidas, evitando atravessar visualmente os edifícios.
 
 ## Camadas
 
-| Camada | Para que serve |
-| --- | --- |
-| `00 - Referencia visual` | Imagem existente usada como guia. |
-| `01 - Eixos viarios` | Polylines para eixo da avenida, conexoes e caminhos da ponte. |
-| `02 - Superficies de ruas e calcadas` | Polygons para contorno real das vias, calcadas e cruzamentos. |
-| `03 - Canal, margens e travessias` | Polygons para agua, margens, ponte e encontros com as vias. |
-| `04 - Quadras e volumes` | Footprints e volumes gerais dos blocos urbanos. |
-| `05 - Marcos visuais e elementos urbanos` | Posicionamento de edificios de destaque, torres, placas e props. |
-| `06 - Distritos e hotspots` | Areas dos cinco distritos e alvos de navegacao. |
+1. Piso e malha viária
+2. Edifícios 2.5D
+3. Praças, travessias e mobiliário
+4. Identidade e navegação
 
-## Primeiro bloco a validar
+## Próxima etapa
 
-Nao vamos desenhar a metropole inteira de uma vez. O primeiro recorte deve conter:
-
-1. Um trecho da avenida principal.
-2. Duas conexoes secundarias.
-3. Um cruzamento com geometria clara.
-4. O canal e uma ponte, incluindo as duas aproximacoes.
-5. Dois ou tres blocos de edificios em volta das vias.
-6. Uma area de distrito e seu hotspot, para confirmar que a navegacao pode ficar alinhada ao desenho.
-
-## Criterio para avancar
-
-O bloco so segue para o renderizador quando a composicao estiver visualmente correta: continuidade das vias, cruzamento sem emendas, ponte ligada as aproximacoes, quadras sem invadir as ruas e edificios com escala/perspectiva coerentes com a referencia.
-
-Depois disso faremos um spike isolado com **PixiJS + pixi-tiledmap** dentro do React. A Hero, os hotspots existentes e o mapa atual permanecem preservados ate a nova cena passar pela validacao visual e pelo build local.
+Validar no Tiled a leitura dos quarteirões, a escala dos prédios e a continuidade das vias. Depois, desenhar mais variações de edifícios, calçadas, iluminação e vegetação antes de integrar ao renderizador do portfólio.
