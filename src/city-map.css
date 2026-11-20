@@ -114,13 +114,16 @@ html {
 
 .city-map__fallback {
     position: relative;
-    display: grid;
-    min-height: min(68vw, 780px);
-    place-items: center;
     overflow: hidden;
-    background:
-        radial-gradient(ellipse at 50% 65%, rgba(96, 31, 163, 0.48), transparent 48%),
-        linear-gradient(180deg, #090613 0%, #1b0e2c 58%, #080610 100%);
+    background: #080610;
+}
+
+.city-map__fallback-art {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1648 / 928;
+    object-fit: contain;
 }
 
 .city-map__fallback::before {
