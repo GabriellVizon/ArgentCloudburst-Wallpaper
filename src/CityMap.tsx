@@ -144,14 +144,12 @@ export default function CityMap() {
                     {sceneAvailable ? (
                         <CityEnvironment onFailure={() => setSceneAvailable(false)} />
                     ) : (
-                        <div className="city-map__fallback" role="img" aria-label="Prévia estilizada do mapa da metrópole">
-                            <div className="city-map__fallback-skyline" />
-                            <div className="city-map__fallback-river" />
-                            <div className="city-map__fallback-title">
-                                <span>GV / CITY NETWORK</span>
-                                <strong>MAPA DA METRÓPOLE</strong>
-                                <small>Não foi possível iniciar o Canvas 2D neste navegador.</small>
-                            </div>
+                        <div className="city-map__fallback">
+                            <img
+                                className="city-map__fallback-art"
+                                src="/assets/neon-cyberpunk-city-map.png"
+                                alt="Arte original do mapa da cidade cyberpunk."
+                            />
                         </div>
                     )}
 
