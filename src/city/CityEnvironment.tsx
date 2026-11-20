@@ -37,8 +37,6 @@ export default function CityEnvironment({ onFailure }: CityEnvironmentProps) {
         return () => {
             artwork.onload = null
             artwork.onerror = null
-            canvas.width = 0
-            canvas.height = 0
         }
     }, [])
 
