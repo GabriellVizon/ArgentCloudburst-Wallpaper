@@ -39,8 +39,8 @@ html {
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 824 / 464;
-    image-rendering: pixelated;
+    aspect-ratio: 1648 / 928;
+    image-rendering: auto;
 }
 
 .city-map__image-nav,
